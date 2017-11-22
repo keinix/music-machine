@@ -9,9 +9,13 @@ import android.util.Log;
 public class DownloadHandeler extends Handler {
 
     public static final String TAG = DownloadHandeler.class.getSimpleName();
+    private DownloadService mService;
+
+
     @Override
     public void handleMessage(Message msg) {
         downloadSong(msg.obj.toString());
+        mService.stopSelf(msg.arg1);
     }
 
     private void downloadSong(String song) {
@@ -24,5 +28,9 @@ public class DownloadHandeler extends Handler {
             }
         }
         Log.d(TAG, "Download Finished: " + song);
+    }
+
+    public void setService(DownloadService service) {
+        mService = service;
     }
 }

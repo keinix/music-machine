@@ -3,6 +3,7 @@ package io.keinix.musicmachine;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -10,25 +11,26 @@ import android.util.Log;
 public class DownloadService extends Service {
 
     public static final String TAG = DownloadService.class.getSimpleName();
+    DownloadThread mThread;
+
+    @Override
+    public void onCreate() {
+        mThread = new DownloadThread();
+        mThread.setName("DownloadThread");
+        mThread.start();
+        mThread.mDownloadHandeler.setService(this);
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String song = intent.getStringExtra(MainActivity.KEY_SONG);
-        downloadSong(song);
+        Message message = Message.obtain();
+        message.obj = song;
+        message.arg1 = startId;
+        mThread.mDownloadHandeler.sendMessage(message);
         return Service.START_REDELIVER_INTENT;
     }
 
-    private void downloadSong(String song) {
-        long endTime = System.currentTimeMillis() + (10 * 1000);
-        while (System.currentTimeMillis() < endTime ) {
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "Download Finished: " + song);
-    }
 
     @Nullable
     @Override
