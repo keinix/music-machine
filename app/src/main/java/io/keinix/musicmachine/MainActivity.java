@@ -13,7 +13,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private @BindView(R.id.downloadButton) Button mDownloadBUtton;
+    @BindView(R.id.downloadButton) Button mDownloadButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,17 +21,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-     mDownloadBUtton.setOnClickListener(new View.OnClickListener() {
+     mDownloadButton.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
              Toast.makeText(MainActivity.this, "Downloading", Toast.LENGTH_SHORT).show();
-             downloadSong();
+
+             Runnable runnable = new Runnable() {
+                 @Override
+                 public void run() {
+                     downloadSong();
+                 }
+             };
+
+             DownloadThread thread = new DownloadThread();
+             thread.setName("DownloadThread");
+             thread.start();
          }
      });
     }
 
     private void downloadSong() {
-        long endTime = System.currentTimeMillis() + (10 * 100);
+        long endTime = System.currentTimeMillis() + (10 * 1000);
         while (System.currentTimeMillis() < endTime ) {
             try {
                 Thread.sleep(1000L);
