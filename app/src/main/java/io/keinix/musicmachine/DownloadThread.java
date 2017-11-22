@@ -1,27 +1,20 @@
 package io.keinix.musicmachine;
 
+import android.os.Looper;
 import android.util.Log;
 
 import static android.content.ContentValues.TAG;
 
 public class DownloadThread extends Thread {
 
+    public DownloadHandeler mDownloadHandeler;
+
     @Override
     public void run() {
-        for (String song : Playlist.songs) {
-        downloadSong();
-        }
+        Looper.prepare();
+        mDownloadHandeler = new DownloadHandeler();
+        Looper.loop();
     }
 
-    private void downloadSong() {
-        long endTime = System.currentTimeMillis() + (10 * 1000);
-        while (System.currentTimeMillis() < endTime ) {
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "song DLed");
-    }
+
 }

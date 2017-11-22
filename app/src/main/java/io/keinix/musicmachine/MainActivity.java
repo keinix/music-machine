@@ -1,5 +1,7 @@
 package io.keinix.musicmachine;
 
+import android.content.Intent;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    public static final String KEY_SONG = "SONG";
     @BindView(R.id.downloadButton) Button mDownloadButton;
 
     @Override
@@ -21,34 +24,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        // start thread early so it can init before sending messages
+
+
      mDownloadButton.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
+
              Toast.makeText(MainActivity.this, "Downloading", Toast.LENGTH_SHORT).show();
+             // send Messages or  to handler for processing
 
-             Runnable runnable = new Runnable() {
-                 @Override
-                 public void run() {
-                     downloadSong();
-                 }
-             };
+             for (String song : Playlist.songs) {
+                 Intent intent = new Intent(MainActivity.this, DownloadService.class);
+                 intent.putExtra(KEY_SONG, song);
+                 startService(intent);
+             }
 
-             DownloadThread thread = new DownloadThread();
-             thread.setName("DownloadThread");
-             thread.start();
          }
      });
-    }
 
-    private void downloadSong() {
-        long endTime = System.currentTimeMillis() + (10 * 1000);
-        while (System.currentTimeMillis() < endTime ) {
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "song DLed");
     }
 }
