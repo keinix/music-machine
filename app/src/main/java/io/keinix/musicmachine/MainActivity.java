@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -19,15 +22,22 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final String KEY_SONG = "SONG";
     private boolean mIsServiceBound = false;
-    private PlayerService mPlayerService;
+    private Messenger mServiceMessenger;
+    private Messenger mActivityMessenger = new Messenger(new ActivityHandler(this));
+    // private PlayerService mPlayerService;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             mIsServiceBound = true;
-            PlayerService.LocalBinder localBinder = (PlayerService.LocalBinder) binder;
-            mPlayerService = localBinder.getService();
-            if (mPlayerService.isPlaying()) {
-                mPlayPauseButton.setText("Pause");
+            mServiceMessenger = new Messenger(binder);
+            Message message = Message.obtain();
+            message.arg1 = 2; // check if Music is playing
+            message.arg2 = 1; // just update Text
+            message.replyTo = mActivityMessenger;
+            try {
+                mServiceMessenger.send(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
         }
 
@@ -52,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         // start thread early so it can init before sending messages
 
 
-     mDownloadButton.setOnClickListener(new View.OnClickListener() {
+        mDownloadButton.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
 
@@ -65,28 +75,34 @@ public class MainActivity extends AppCompatActivity {
                  startService(intent);
              }
 
-         }
-     });
+            }
+        });
 
-     mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
-         @Override
-         public void onClick(View v) {
+        mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-             if (mIsServiceBound) {
-                 if (mPlayerService.isPlaying()) {
-                     mPlayerService.pause();
-                     mPlayPauseButton.setText("Play");
-                 } else {
-                     // no song is playing
+                 if (mIsServiceBound) {
                      Intent intent = new Intent(MainActivity.this, PlayerService.class);
                      startService(intent);
-                     mPlayerService.play();
-                     mPlayPauseButton.setText("Pause");
-                 }
-             }
-         }
-     });
 
+                     Message message = Message.obtain();
+                     message.arg1 = 2;
+                     message.replyTo = mActivityMessenger;
+                     try {
+                         mServiceMessenger.send(message);
+                     } catch (RemoteException e) {
+                         e.printStackTrace();
+                     }
+                 }
+
+            }
+         });
+
+    }
+
+    public void changePlayButtonText(String text) {
+        mPlayPauseButton.setText(text);
     }
 
     @Override
