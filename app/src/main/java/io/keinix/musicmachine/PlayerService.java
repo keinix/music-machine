@@ -3,6 +3,7 @@ package io.keinix.musicmachine;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -12,6 +13,7 @@ public class PlayerService extends Service {
     public static final String TAG = PlayerService.class.getSimpleName();
 
     private MediaPlayer mPlayer;
+    private IBinder mIBinder = new LocalBinder();
 
     @Override
     public void onCreate() {
@@ -23,8 +25,19 @@ public class PlayerService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind called");
-        return null;
+        return mIBinder;
 
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                stopSelf();
+            }
+        });
+        return Service.START_NOT_STICKY;
     }
 
     @Override
@@ -39,7 +52,18 @@ public class PlayerService extends Service {
         mPlayer.release();
     }
 
+    public class LocalBinder extends Binder {
+
+        public PlayerService getService() {
+            return PlayerService.this;
+        }
+    }
+
     // client methods
+
+    public boolean isPlaying() {
+        return mPlayer.isPlaying();
+    }
 
     public void play() {
         mPlayer.start();
