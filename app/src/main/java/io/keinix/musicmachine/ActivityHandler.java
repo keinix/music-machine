@@ -3,6 +3,7 @@ package io.keinix.musicmachine;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Log;
 
 
 public class ActivityHandler extends Handler {
@@ -15,6 +16,9 @@ public class ActivityHandler extends Handler {
 
     @Override
     public void handleMessage(Message msg) {
+
+        Log.d("FINDME", "ActivityHandler: " + "arg1 " + msg.arg1 + " " + "arg2: " + msg.arg2);
+        System.out.println("activity Handler");
 
         if (msg.arg1 == 0) {
             // music is not playing

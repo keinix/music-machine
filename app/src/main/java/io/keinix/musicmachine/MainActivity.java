@@ -10,6 +10,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -23,11 +24,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_SONG = "SONG";
     private boolean mIsServiceBound = false;
     private Messenger mServiceMessenger;
-    private Messenger mActivityMessenger = new Messenger(new ActivityHandler(this));
+    public Messenger mActivityMessenger = new Messenger(new ActivityHandler(this));
     // private PlayerService mPlayerService;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
+            Log.d(TAG, "onServiceConnectedCalled");
             mIsServiceBound = true;
             mServiceMessenger = new Messenger(binder);
             Message message = Message.obtain();
